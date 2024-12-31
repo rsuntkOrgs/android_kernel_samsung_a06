@@ -1,4 +1,4 @@
-# Galaxy A34 5G Kernel source
+# Galaxy A06 Kernel source
 
 ### How to clone this repository
 ```sh
