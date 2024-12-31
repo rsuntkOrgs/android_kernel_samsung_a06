@@ -4,7 +4,7 @@ on:
     inputs:
       BRANCH:
         description: Kernel branch
-        default: 'main'
+        default: 'fourteen'
         required: true
       LTO:
         description: 'Link Time Optimisation'
