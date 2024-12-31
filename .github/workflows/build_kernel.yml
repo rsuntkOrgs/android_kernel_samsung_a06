@@ -21,6 +21,9 @@ on:
       KSU:
         description: Add KernelSU support
         type: boolean
+      SELINUX_PERMISSIVE:
+        description: Set SELinux as Permissive by default
+        type: boolean
       UPLOAD_TO_TG:
         description: Upload to Telegram
         type: boolean
@@ -88,6 +91,11 @@ jobs:
         export DEFCONFIG="rsuntk_defconfig"
         export DEVICE="A065F"
         export DEVICE_ID="A06"
+        
+        if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
+          rm -rf security/selinux && cd security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd ..
+          echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+        fi
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
         
