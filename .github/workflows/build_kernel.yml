@@ -51,9 +51,9 @@ jobs:
         mkdir toolchains
         cd toolchains
         if [[ ${{ github.event.inputs.CLANG_EIGHTEEN }} != "true" ]]; then
-          git clone --depth=1 https://gitlab.com/Rissu-Projekt/toolchains/clang-toolchains.git clang-11
+          git clone --depth=1 https://github.com/rsuntk/toolchains.git -b clang-12 clang
         else
-          mkdir clang-18 && cd clang-18
+          mkdir clang && cd clang
           wget -q -O clang18.tar.gz https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/main/clang-r522817.tar.gz
           tar -xf clang18.tar.gz && rm clang18.tar.gz && cd ..
         fi
@@ -67,20 +67,13 @@ jobs:
     - name: Build kernel
       id: buildKernel
       run: |
-        if [[ "${{ github.event.inputs.CLANG_EIGHTEEN }}" != "true" ]]; then
-          CLANG_VERSION=11
-        else
-          CLANG_VERSION=18
-        fi
-        
-        export PATH=$(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin:$PATH
+        export PATH=$(pwd)/toolchains/clang/bin:$PATH
         export CROSS_COMPILE=$(pwd)/toolchains/gnu/bin/aarch64-linux-gnu-
         export CLANG_TRIPLE=aarch64-linux-gnu-
-
+        export LTO="${{ github.event.inputs.LTO }}"
         export KBUILD_BUILD_USER="rsuntk"
         export KBUILD_BUILD_HOST="rsuntkOrgs"
         export BUILD_START=`date +'%d %B %Y @ %m:%M'`
-        export SELINUX_STATE="Enforcing"
         export IS_CI=true
         export LLVM=1
         export LLVM_IAS=1
@@ -91,6 +84,9 @@ jobs:
         if [[ "${{ github.event.inputs.SELINUX_PERMISSIVE }}" = "true" ]]; then
           rm -rf security/selinux && cd security/ && git clone https://github.com/rsuntk/selinux_perm.git --depth=1 selinux && rm -rf selinux/.git && cd ..
           echo "CONFIG_SECURITY_SELINUX_ALWAYS_PERMISSIVE=y" >> arch/arm64/configs/$DEFCONFIG
+          export SELINUX_STATE="Permissive"
+        else
+          export SELINUX_STATE="Enforcing"
         fi
         
         export KERNELSU="${{ github.event.inputs.KSU }}"
@@ -162,12 +158,6 @@ jobs:
         
     - name: Strip LKMs
       run: |
-        if [[ "${{ github.event.inputs.CLANG_EIGHTEEN }}" != "true" ]]; then
-          CLANG_VERSION=11
-        else
-          CLANG_VERSION=18
-        fi
-        
         # Cleanup zip
         rm -rf *.zip
 
@@ -182,7 +172,7 @@ jobs:
         # Start stripping
         for file in $LIST; do
           echo -e "- Stripping `basename $file`"
-          $(pwd)/toolchains/clang-`echo $CLANG_VERSION`/bin/llvm-strip "$file" --strip-unneeded
+          $(pwd)/toolchains/clang/bin/llvm-strip "$file" --strip-unneeded
         done
         mv ../kernel_object_tmp/*.ko $(pwd)/kernel_object/
       working-directory: kernel_root
