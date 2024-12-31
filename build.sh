@@ -22,10 +22,12 @@ fi
 DEFAULT_ARGS="
 CONFIG_SECTION_MISMATCH_WARN_ONLY=y
 ARCH=arm64
+KCFLAGS=-w
 "
 export PROJECT_NAME="a06"
 export ARCH=arm64
 export CLANG_TRIPLE=aarch64-linux-gnu-
+export KCFLAGS=-w
 # end of default args
 
 strip() { # fmt: strip <module>
