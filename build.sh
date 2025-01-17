@@ -127,7 +127,7 @@ else
 	[ $# != 4 ] && usage
 fi
 
-[ "$KERNELSU" = "true" ] && curl -LSs $DEFAULT_KSU_REPO | bash -s main || echo -e "KernelSU is disabled. Add 'KERNELSU=true' or 'export KERNELSU=true' to enable"
+[ "$KERNELSU" = "true" ] && curl -LSs $DEFAULT_KSU_REPO | bash -s test_branch || echo -e "KernelSU is disabled. Add 'KERNELSU=true' or 'export KERNELSU=true' to enable"
 
 BUILD_TARGET="$1"
 FIRST_JOB="$2"
